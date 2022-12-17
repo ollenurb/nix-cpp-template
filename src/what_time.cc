@@ -4,7 +4,6 @@
 
 int main(int argc, char ** argv) {
   absl::Time time = absl::Now();
-  spdlog::info("Currently, the UTC time is {}",
-               absl::FormatTime(time, absl::UTCTimeZone()));
+  spdlog::info("Currently, the UTC time is {}", absl::FormatTime(time, absl::UTCTimeZone()));
   return 0;
 }

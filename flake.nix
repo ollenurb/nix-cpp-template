@@ -2,13 +2,6 @@
   description = "A template for Nix based C++ project setup.";
 
   inputs = {
-    # Pointing to the current stable release of nixpkgs. You can
-    # customize this to point to an older version or unstable if you
-    # like everything shining.
-    #
-    # E.g.
-    #
-    # nixpkgs.url = "github:NixOS/nixpkgs/unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/21.11";
 
     utils.url = "github:numtide/flake-utils";
@@ -46,6 +39,7 @@
                    gtest
 
                    # Build time and Run time dependencies
+                    
                    spdlog
                    abseil-cpp
                  ];

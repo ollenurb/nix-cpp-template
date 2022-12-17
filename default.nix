@@ -10,8 +10,20 @@ llvmPackages_11.stdenv.mkDerivation rec {
   
   src = ./.;
 
-  nativeBuildInputs = [ cmake ];
-  buildInputs = [ spdlog abseil-cpp ];
+  nativeBuildInputs = [
+    cmake
+  ];
+
+  buildInputs = [
+    llvmPackages_11.libcxx
+    spdlog
+    abseil-cpp
+  ];
+
+  CPATH = builtins.concatStringsSep ":" [
+    (lib.makeSearchPathOutput "dev" "include" [llvmPackages_11.libcxx])
+    (lib.makeSearchPath "resource-root/include" [llvmPackages_11.clang])
+  ];
 
   cmakeFlags = [
     "-DENABLE_TESTING=OFF"
