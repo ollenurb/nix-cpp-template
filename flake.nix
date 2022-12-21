@@ -1,58 +1,60 @@
 {
-  description = "A template for Nix based C++ project setup.";
+  description = "C/C++ environment";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/21.11";
-
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     utils.url = "github:numtide/flake-utils";
-    utils.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: inputs.utils.lib.eachSystem [
-    # Add the system/architecture you would like to support here. Note that not
-    # all packages in the official nixpkgs support all platforms.
-    "x86_64-linux" "i686-linux" "aarch64-linux" "x86_64-darwin"
-  ] (system: let pkgs = import nixpkgs {
-                   inherit system;
+  outputs = { self, nixpkgs, utils, ... }@inputs:
+    utils.lib.eachDefaultSystem (
+      system:
+      let
+        p = import nixpkgs {
+          inherit system;
 
-                   # Add overlays here if you need to override the nixpkgs
-                   # official packages.
-                   overlays = [];
-                   
-                   # Uncomment this if you need unfree software (e.g. cuda) for
-                   # your project.
-                   #
-                   # config.allowUnfree = true;
-                 };
-             in {
-               devShell = pkgs.mkShell rec {
-                 # Update the name to something that suites your project.
-                 name = "my-c++-project";
+          # Uncomment this if you need overlays 
+          # your project.
+          # overlays = [ ];
 
-                 packages = with pkgs; [
-                   # Development Tools
-                   llvmPackages_11.clang
-                   cmake
-                   cmakeCurses
+          # Uncomment this if you need unfree software (e.g. cuda) for
+          # your project.
+          # config.allowUnfree = true;
+        };
+        llvm = p.llvmPackages_latest;
+      in
+      {
+        devShell = p.mkShell.override { stdenv = p.clangStdenv; } rec {
+          packages = with p; [
+            # builder
+            gnumake
+            cmake
 
-                   # Development time dependencies
-                   gtest
+            # debugger
+            llvm.lldb
+            gdb
 
-                   # Build time and Run time dependencies
-                    
-                   spdlog
-                   abseil-cpp
-                 ];
+            # fix headers not found
+            clang-tools
 
-                 # Setting up the environment variables you need during
-                 # development.
-                 shellHook = let
-                   icon = "f121";
-                 in ''
-                    export PS1="$(echo -e '\u${icon}') {\[$(tput sgr0)\]\[\033[38;5;228m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]} (${name}) \\$ \[$(tput sgr0)\]"
-                 '';
-               };
+            # LSP and compiler
+            llvm.libstdcxxClang
 
-               defaultPackage = pkgs.callPackage ./default.nix {};
-             });
+            # other tools
+            cppcheck
+            llvm.libllvm
+            valgrind
+
+            # stdlib for cpp
+            llvm.libcxx
+              
+            # libs
+            # glm
+            # SDL2
+            # SDL2_gfx
+          ];
+          name = "C";
+        };
+      }
+    );
 }
